@@ -8,9 +8,9 @@ const router=createBrowserRouter([
         element:<App />,
         children:[
             {
-                path:"Books",
+                path:"books",
                 element:<>
-                <h1>Books</h1>
+               
                 </>
 
             }
