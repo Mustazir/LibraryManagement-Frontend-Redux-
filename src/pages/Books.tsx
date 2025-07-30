@@ -3,15 +3,25 @@
 import { Button } from "@/components/ui/button"
 import { useGetBooksQuery } from "@/redux/api/baseApi"
 import type { IBook } from "@/type"
-import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from './../../node_modules/@tanstack/react-table/src/index';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
+import type { ColumnDef } from "@tanstack/react-table"
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { AddBook } from "@/components/Books/AddBook"
 
-
-// 1. Define your Book type
-
-
-// 2. Table Columns
+// 📌 Define columns
 export const columns: ColumnDef<IBook>[] = [
   {
     accessorKey: "title",
@@ -48,71 +58,97 @@ export const columns: ColumnDef<IBook>[] = [
   },
   {
     id: "actions",
+    header: "Actions",
     cell: ({ row }) => {
       const book = row.original
       return (
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => console.log("Edit", book._id)}>📝</Button>
-          <Button variant="destructive" size="sm" onClick={() => console.log("Delete", book._id)}>❌</Button>
-          <Button variant="default" size="sm" onClick={() => console.log("Borrow", book._id)}>📦</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => console.log("Edit", book._id)}
+          >
+            📝
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => console.log("Delete", book._id)}
+          >
+            ❌
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => console.log("Borrow", book._id)}
+          >
+            📦
+          </Button>
         </div>
       )
     },
   },
 ]
 
-// 3. Component
 export function Books() {
   const { data, isLoading, error } = useGetBooksQuery(undefined, {
-    pollingInterval: 10000,
+    pollingInterval: 1000,
   })
 
   const table = useReactTable({
-    data: data?.data || [], // 👈 Your API returns `data: { data: [...] }`
+    data: data?.data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   })
 
-  if (isLoading) return <p>Loading...</p>
-  if (error) return <p>Error loading books</p>
+  if (isLoading)
+    return <p className="text-center py-6">Loading...</p>
+  if (error)
+    return <p className="text-center text-red-500 py-6">Error loading books</p>
 
   return (
-    <div className="w-full">
-      <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+    <>
+    <div className="flex justify-center p-4">
+      <AddBook/>
+    </div>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="w-full max-w-7xl overflow-x-auto">
+        <div className="min-w-[700px] rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id} className="text-sm md:text-base whitespace-nowrap">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="text-center h-24">
-                  No books found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="text-xs md:text-sm whitespace-nowrap">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="text-center py-8">
+                    No books found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-    </div>
+    </div></>
   )
 }
