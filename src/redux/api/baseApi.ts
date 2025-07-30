@@ -1,6 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-
 export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:5000/api" }),
@@ -10,7 +9,14 @@ export const baseApi = createApi({
       query: () => "/books",
       providesTags: ["Books"],
     }),
+    addBook: builder.mutation({
+      query: (book) => ({
+        url: "/books",
+        method: "POST",
+        body: book,
+      }),
+    }),
   }),
 });
 
-export const{useGetBooksQuery}=baseApi;
+export const { useGetBooksQuery,useAddBookMutation } = baseApi;
