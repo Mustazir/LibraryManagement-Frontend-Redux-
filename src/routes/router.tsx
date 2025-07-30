@@ -1,4 +1,5 @@
 import App from "@/App";
+import Books from "@/pages/Books";
 import { createBrowserRouter } from "react-router";
 
 
@@ -9,9 +10,9 @@ const router=createBrowserRouter([
         children:[
             {
                 path:"books",
-                element:<>
-               
-                </>
+                element:<Books/>
+
+
 
             }
         ]
