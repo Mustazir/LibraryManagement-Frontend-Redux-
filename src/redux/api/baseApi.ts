@@ -15,7 +15,7 @@ export const baseApi = createApi({
         method: "POST",
         body: book,
       }),
-      invalidatesTags: ["Books",],
+      invalidatesTags: ["Books"],
     }),
     updatedBook: builder.mutation({
       query: ({ id, updatedData }) => ({
@@ -25,11 +25,25 @@ export const baseApi = createApi({
       }),
       invalidatesTags: ["Books"],
     }),
+    // ✅ Add optimistic updates to your API
     deletBook: builder.mutation({
       query: (id) => ({
         url: `/books/${id}`,
         method: "DELETE",
       }),
+      // Optimistic update
+      onQueryStarted: async (id, { dispatch, queryFulfilled }) => {
+        const patchResult = dispatch(
+          baseApi.util.updateQueryData("getBooks", undefined, (draft) => {
+            draft.data = draft.data.filter((book) => book._id !== id);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
       invalidatesTags: ["Books"],
     }),
     borrowBook: builder.mutation({
@@ -43,7 +57,7 @@ export const baseApi = createApi({
 
     getBorrowSummary: builder.query({
       query: () => "/borrow",
-      providesTags: ["Books","BorrowSummary"],
+      providesTags: ["Books", "BorrowSummary"],
     }),
   }),
 });
@@ -53,6 +67,6 @@ export const {
   useAddBookMutation,
   useUpdatedBookMutation,
   useDeletBookMutation,
-   useBorrowBookMutation,
+  useBorrowBookMutation,
   useGetBorrowSummaryQuery,
 } = baseApi;

@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,40 +11,43 @@ import { useState } from "react";
 import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useAddBookMutation } from "@/redux/api/baseApi";
+import { toast } from "sonner";
+import { LoadingButton } from "@/components/ui/loading";
 
 export default function AddBookPage() {
   const form = useForm();
   const [createTask] = useAddBookMutation();
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // ✅ FIXED: Added finally block and fixed duplicate setIsSubmitting
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    setIsSubmitting(true);
     setErrorMessage("");
 
-    const taskData = {
-      ...data,
-      isCompleted: false,
-    };
-
     try {
-      const res = await createTask(taskData).unwrap();
+      const res = await createTask(data).unwrap();
       console.log(res);
       form.reset();
-      alert("Book added successfully!");
+      toast.success("Book added successfully!");
     } catch (error: any) {
       const msg = error?.data?.message || "";
 
       if (msg.includes("E11000")) {
-        setErrorMessage("Duplicate ISBN! Please use a unique one.");
+        toast.error("Duplicate ISBN! Please use a unique one.");
       } else if (msg.toLowerCase().includes("isbn") && msg.includes("4")) {
-        setErrorMessage("ISBN must be at least 4 characters.");
+        toast.error("ISBN must be at least 4 characters.");
       } else {
-        setErrorMessage("Something went wrong.");
+        toast.error("Something went wrong.");
       }
+    } finally {
+      // ✅ This ensures loading stops whether success or error
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-2 lg:mx-auto my-10 p-6 bg-black shadow rounded-md">
+    <div className="max-w-2xl mx-2 md:mx-auto my-10 p-6 bg-black shadow rounded-md">
       <h2 className="text-2xl font-bold mb-6">Add a New Book</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -142,7 +144,13 @@ export default function AddBookPage() {
           {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
           <div className="flex justify-end gap-4 pt-4">
-            <Button type="submit">Save Book</Button>
+            <LoadingButton
+              type="submit"
+              isLoading={isSubmitting}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Save Book
+            </LoadingButton>
           </div>
         </form>
       </Form>

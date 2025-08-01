@@ -26,17 +26,21 @@ import { Input } from "@/components/ui/input";
 import { useBorrowBookMutation } from "@/redux/api/baseApi";
 import type { IBook } from "@/type";
 
-import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
+import { toast } from "sonner";
+import { LoadingButton } from "@/components/ui/loading";
+
 
 export function BorrowBook({ book }: { book: IBook }) {
   const [open, setOpen] = useState(false);
   const [borrowBook] = useBorrowBookMutation();
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -45,22 +49,26 @@ export function BorrowBook({ book }: { book: IBook }) {
     },
   });
 
- const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+
+
+const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+     setIsSubmitting(true);
+
   setErrorMessage("");
 
   const quantity = parseInt(data.quantity);
   if (isNaN(quantity) || quantity < 1) {
-    setErrorMessage("Enter a valid quantity (1 or more).");
+    toast.error("Enter a valid quantity (1 or more).");
     return;
   }
 
   if (quantity > book.copies) {
-    setErrorMessage(`Only ${book.copies} copies are available.`);
+    toast.error(`Only ${book.copies} copies are available.`);
     return;
   }
 
   if (!data.dueDate) {
-    setErrorMessage("Please select a due date.");
+    toast.error("Please select a due date.");
     return;
   }
 
@@ -68,17 +76,19 @@ export function BorrowBook({ book }: { book: IBook }) {
     await borrowBook({
       book: book._id,
       quantity,
-      dueDate: data.dueDate, // ✅ include this line
+      dueDate: data.dueDate,
     }).unwrap();
 
-    alert(`Successfully borrowed ${quantity} copy/copies!`);
+    toast.success(`Successfully borrowed ${quantity} copy/copies!`);
     form.reset();
     setOpen(false);
   } catch (error) {
     console.error("Borrow error:", error);
-    setErrorMessage("Failed to borrow. Please try again.");
-  }
+    toast.error("Failed to borrow. Please try again.");
+  }    setIsSubmitting(true);
+
 };
+
 
 
   return (
@@ -154,7 +164,13 @@ export function BorrowBook({ book }: { book: IBook }) {
               <DialogClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
-              <Button type="submit">Confirm Borrow</Button>
+              <LoadingButton
+          type="submit"
+          isLoading={isSubmitting}
+          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+        >
+          Confirm Borrow
+        </LoadingButton>
             </DialogFooter>
           </form>
         </Form>
