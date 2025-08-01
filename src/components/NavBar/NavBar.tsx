@@ -7,7 +7,7 @@ const Navbar = () => {
 
   const navItems = [
     { name: "All Books", path: "/books" },
-    { name: "Add Book", path: "/create-book" },
+    { name: "Add Book", path: "/add-book" },
     { name: "Borrow Summary", path: "/borrow-summary" },
   ];
 

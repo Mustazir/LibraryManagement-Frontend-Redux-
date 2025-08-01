@@ -19,15 +19,16 @@ import {
   type ColumnDef,
 
 } from "@tanstack/react-table";
-import { AddBook } from "@/components/Books/AddBook";
+
 import type { IBook } from "@/type";
+import { UpdateBooks } from "@/components/Books/UpdateBooks";
+import { BorrowBook } from "@/components/Borrow/BorrowBook";
 
 export function Books() {
-  const { data, isLoading, error } = useGetBooksQuery(undefined, {
-    pollingInterval: 1000,
-  });
+  const { data, isLoading, error } = useGetBooksQuery(undefined);
 
   const [deleteBook] = useDeletBookMutation();
+
 
   const handleDelete = async (id: string) => {
     try {
@@ -38,7 +39,8 @@ export function Books() {
     }
   };
 
-  // ✅ Define columns INSIDE the component so handleDelete is accessible
+
+
   const columns: ColumnDef<IBook>[] = [
     { accessorKey: "title", header: "Title" },
     { accessorKey: "author", header: "Author" },
@@ -59,25 +61,28 @@ export function Books() {
       ),
     },
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const book = row.original;
-        return (
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => console.log("Edit", book._id)}>
-              📝
-            </Button>
-            <Button variant="destructive" size="sm" onClick={() => handleDelete(book._id)}>
-              ❌
-            </Button>
-            <Button variant="default" size="sm" onClick={() => console.log("Borrow", book._id)}>
-              📦
-            </Button>
-          </div>
-        );
-      },
-    },
+  id: "actions",
+  header: "Actions",
+  cell: ({ row }) => {
+    const book = row.original;
+    return (
+      <div className="flex flex-wrap gap-2">
+        <UpdateBooks book={book} />
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => handleDelete(book._id)}
+        >
+          DEL
+        </Button>
+
+
+          <BorrowBook book={book} />
+
+      </div>
+    );
+  },
+}
   ];
 
   const table = useReactTable({
@@ -93,7 +98,7 @@ export function Books() {
   return (
     <>
       <div className="flex justify-center p-4">
-        <AddBook />
+
       </div>
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-7xl overflow-x-auto">

@@ -21,11 +21,14 @@ import { Input } from "@/components/ui/input";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+
+import { useUpdatedBookMutation } from "@/redux/api/baseApi";
 import type { IBook } from "@/type";
+import { useState } from "react";
 
 
 import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form";
+
 
 
 export function UpdateBooks({ book: book }: { book: IBook }) {
@@ -36,141 +39,150 @@ export function UpdateBooks({ book: book }: { book: IBook }) {
       genre: book.genre,
       isbn: book.isbn,
       description: book.description,
-      copies: book.copies,
+      copies: book.copies.toString(), // in case it's a number
     },
   });
+const [updateBook] = useUpdatedBookMutation();
+const [open, setOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
 
 
+const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    try {
+      await updateBook({
+        id: book._id,
+        updatedData: { ...data, copies: Number(data.copies) }, // Ensure copies is a number
+      }).unwrap();
+      alert("Book updated successfully!");
+      setOpen(false);
+    } catch (error: any) {
+      const msg = error?.data?.message || "";
+      if (msg.includes("E11000")) {
+        setErrorMessage("Duplicate ISBN! Please use a unique one.");
+      } else if (msg.toLowerCase().includes("isbn") && msg.includes("4")) {
+        setErrorMessage("ISBN must be at least 4 characters.");
+      } else {
+        setErrorMessage("Something went wrong.");
+      }
+    }
+  };
 
-
- const onSubmit: SubmitHandler<FieldValues> = (data) => {
-  dispatch(updateTask({
-    id: book.id,
-    updatedData: {
-      ...data,
-    },
-  }));
-};
 
   return (
-    <Dialog>
-      <form>
-        <DialogTrigger asChild>
-          <Button>Update Task</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogDescription className="sr-only">Add Title</DialogDescription>
-          <DialogHeader>
-            <DialogTitle>Add Task</DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input {...field} value={field.value || ""} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} value={field.value || ""} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Priority</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a Priority" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="LOW">
-                          LOW
-                        </SelectItem>
-                        <SelectItem value="MEDIUM">
-                          MEDIUM
-                        </SelectItem>
-                        <SelectItem value="HIGH">
-                          HIGH
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+ <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">Update Book</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Update Book</DialogTitle>
+          <DialogDescription className="sr-only">Edit the book details</DialogDescription>
+        </DialogHeader>
 
-                  </FormItem>
-                )}
-              />
-              <FormField
-          control={form.control}
-          name="dueDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Due Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        " pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
+                    <Input {...field} value={field.value || ""} />
                   </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
+                </FormItem>
+              )}
+            />
 
-                    captionLayout="dropdown"
-                  />
-                </PopoverContent>
-              </Popover>
+            <FormField
+              control={form.control}
+              name="author"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Author</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ""} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="genre"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Genre</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a Genre" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="FICTION">FICTION</SelectItem>
+                      <SelectItem value="NON_FICTION">NON_FICTION</SelectItem>
+                      <SelectItem value="SCIENCE">SCIENCE</SelectItem>
+                      <SelectItem value="HISTORY">HISTORY</SelectItem>
+                      <SelectItem value="BIOGRAPHY">BIOGRAPHY</SelectItem>
+                      <SelectItem value="FANTASY">FANTASY</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
 
-              <DialogFooter className="mt-5">
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button  type="submit">Save changes</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </form>
+            <FormField
+              control={form.control}
+              name="isbn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ISBN</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ""} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} value={field.value || ""} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="copies"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Copies</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} value={field.value || ""} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <Button type="submit">Save Changes</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
     </Dialog>
   );
 }
