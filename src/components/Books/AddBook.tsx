@@ -26,21 +26,37 @@ export function AddBook() {
   const form = useForm();
 
   const [open, setOpen] = useState(false);
-  const[createTask,{data,isLoading,isError}]=useAddBookMutation();
+  const[createTask,]=useAddBookMutation();
+  const [errorMessage, setErrorMessage] = useState("");
 
-  console.log(data);
-  const onSubmit :SubmitHandler<FieldValues> =async (data) => {
 
-    const taskData= {
-      ...data,
-      isCompleted: false,
-    }
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+  setErrorMessage(""); // clear any old error
 
-    const res=await createTask(taskData).unwrap();
+  const taskData = {
+    ...data,
+    isCompleted: false,
+  };
+
+  try {
+    const res = await createTask(taskData).unwrap();
     console.log(res);
     form.reset();
-    setOpen(false); // Close the dialog after adding the task
-  };
+    setOpen(false);
+  } catch (error: any) {
+  const msg = error?.data?.message || "";
+
+  if (msg.includes("E11000")) {
+    alert("Duplicate ISBN! Please use a unique one.");
+  } else if (msg.toLowerCase().includes("isbn") && msg.includes("4")) {
+    alert("ISBN must be at least 4 characters.");
+  } else {
+    alert("Something went wrong.");
+  }
+}
+
+};
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -150,6 +166,10 @@ export function AddBook() {
                   <Button variant="outline">Cancel</Button>
                 </DialogClose>
                 <Button type="submit">Save changes</Button>
+                {errorMessage && (
+  <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+)}
+
               </DialogFooter>
             </form>
           </Form>
