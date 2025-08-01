@@ -11,9 +11,9 @@ interface BorrowSummary {
 
 export function BorrowedBookCard({ borrow }: { borrow: BorrowSummary }) {
   return (
-    <Card className="w-full max-w-md p-4 shadow-md rounded-xl">
-      <CardHeader>
-        <CardTitle>{borrow.book.title}</CardTitle>
+    <Card className="w-full max-w-lg p-4 shadow-md rounded-xl">
+      <CardHeader className="px-1">
+        <CardTitle >{borrow.book.title}</CardTitle>
         <p className="text-sm text-muted-foreground">ISBN: {borrow.book.isbn}</p>
       </CardHeader>
       <CardContent className="text-sm">

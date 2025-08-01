@@ -45,7 +45,7 @@ export default function AddBookPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 bg-black shadow rounded-md">
+    <div className="max-w-2xl mx-2 lg:mx-auto my-10 p-6 bg-black shadow rounded-md">
       <h2 className="text-2xl font-bold mb-6">Add a New Book</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

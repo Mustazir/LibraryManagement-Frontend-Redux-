@@ -1,5 +1,5 @@
 import App from "@/App";
-import AddBookPage from "@/components/Books/AddBook";
+import AddBookPage from "@/pages/AddBook";
 import { Books } from "@/pages/Books";
 import { BorrowedBooksList } from "@/pages/BorrowedBooksList";
 

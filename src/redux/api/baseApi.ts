@@ -43,7 +43,7 @@ export const baseApi = createApi({
 
     getBorrowSummary: builder.query({
       query: () => "/borrow",
-      providesTags: ["BorrowSummary"],
+      providesTags: ["Books","BorrowSummary"],
     }),
   }),
 });

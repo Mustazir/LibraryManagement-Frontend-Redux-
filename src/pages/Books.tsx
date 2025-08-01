@@ -97,9 +97,7 @@ export function Books() {
 
   return (
     <>
-      <div className="flex justify-center p-4">
 
-      </div>
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-7xl overflow-x-auto">
           <div className="min-w-[700px] rounded-md border">
