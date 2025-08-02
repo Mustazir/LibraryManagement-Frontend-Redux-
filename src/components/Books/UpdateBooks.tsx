@@ -47,7 +47,7 @@ const form = useForm({
 });
 const [updateBook] = useUpdatedBookMutation();
 const [open, setOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage] = useState("");
  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
@@ -71,7 +71,7 @@ const onSubmit: SubmitHandler<FieldValues> = async (data) => {
       toast.error("Something went wrong.");
     }
   }finally {
-      setIsSubmitting(false); 
+      setIsSubmitting(false);
     }
 };
 

@@ -12,7 +12,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-gray-800 shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <Link to="/" className="text-xl font-bold text-blue-600">
@@ -38,8 +38,8 @@ const Navbar = () => {
                 className={({ isActive }) =>
                   `text-sm font-medium ${
                     isActive
-                      ? "text-blue-600 underline"
-                      : "text-gray-700 hover:text-blue-600"
+                      ? "text-white underline"
+                      : "text-white hover:text-blue-600"
                   }`
                 }
               >

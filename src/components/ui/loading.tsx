@@ -1,9 +1,28 @@
 // components/ui/loading.tsx
-import React, { useState, useEffect } from 'react';
+
+import React from 'react';
+
+// Define types for better TypeScript support
+type LoaderSize = 'small' | 'default' | 'large';
+
+interface BookLoaderProps {
+  size?: LoaderSize;
+  message?: string;
+}
+
+interface PageLoaderProps {
+  message?: string;
+  fullScreen?: boolean;
+}
+
+interface LoadingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode;
+  isLoading: boolean;
+}
 
 // Book-themed loader
-export const BookLoader = ({ size = 'default', message = 'Loading...' }) => {
-  const sizeClasses = {
+export const BookLoader: React.FC<BookLoaderProps> = ({ size = 'default', message = 'Loading...' }) => {
+  const sizeClasses: Record<LoaderSize, string> = {
     small: 'w-8 h-8',
     default: 'w-16 h-16',
     large: 'w-24 h-24'
@@ -36,7 +55,7 @@ export const BookLoader = ({ size = 'default', message = 'Loading...' }) => {
 };
 
 // Page loader
-export const PageLoader = ({ message = 'Loading...', fullScreen = false }) => {
+export const PageLoader: React.FC<PageLoaderProps> = ({ message = 'Loading...', fullScreen = false }) => {
   const containerClasses = fullScreen
     ? 'fixed inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center'
     : 'flex items-center justify-center py-12';
@@ -49,7 +68,7 @@ export const PageLoader = ({ message = 'Loading...', fullScreen = false }) => {
 };
 
 // Table skeleton
-export const BookTableSkeleton = () => {
+export const BookTableSkeleton: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col px-4 py-6">
       <div className="w-full max-w-7xl mx-auto space-y-6">
@@ -78,7 +97,7 @@ export const BookTableSkeleton = () => {
             <div className="border-b bg-gray-50 dark:bg-gray-800">
               <div className="flex">
                 {['Title', 'Author', 'Genre', 'ISBN', 'Copies', 'Availability', 'Actions'].map((_, index) => (
-                  <div key={index} className="flex-1 p-4">
+                  <div key={`header-${index}`} className="flex-1 p-4">
                     <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                   </div>
                 ))}
@@ -87,10 +106,10 @@ export const BookTableSkeleton = () => {
 
             {/* Row skeletons */}
             {Array.from({ length: 8 }).map((_, rowIndex) => (
-              <div key={rowIndex} className="border-b last:border-b-0">
+              <div key={`row-${rowIndex}`} className="border-b last:border-b-0">
                 <div className="flex">
                   {Array.from({ length: 7 }).map((_, cellIndex) => (
-                    <div key={cellIndex} className="flex-1 p-4">
+                    <div key={`cell-${rowIndex}-${cellIndex}`} className="flex-1 p-4">
                       <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
                     </div>
                   ))}
@@ -114,7 +133,7 @@ export const BookTableSkeleton = () => {
 };
 
 // Card skeleton
-export const BorrowedBookCardSkeleton = () => {
+export const BorrowedBookCardSkeleton: React.FC = () => {
   return (
     <div className="w-full max-w-lg p-4 shadow-md rounded-xl border bg-white dark:bg-gray-800">
       <div className="space-y-3">
@@ -127,12 +146,18 @@ export const BorrowedBookCardSkeleton = () => {
 };
 
 // Button with loading
-export const LoadingButton = ({ children, isLoading, ...props }) => {
+export const LoadingButton: React.FC<LoadingButtonProps> = ({
+  children,
+  isLoading,
+  className = '',
+  disabled,
+  ...props
+}) => {
   return (
     <button
       {...props}
-      disabled={isLoading || props.disabled}
-      className={`${props.className} relative overflow-hidden transition-all duration-200 ${
+      disabled={isLoading || disabled}
+      className={`${className} relative overflow-hidden transition-all duration-200 ${
         isLoading ? 'opacity-80 cursor-not-allowed' : ''
       }`}
     >

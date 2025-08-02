@@ -6,8 +6,39 @@ import { BorrowedBookCardSkeleton } from "@/components/ui/loading";
 import { Button } from "@/components/ui/button";
 import { BookOpen, RefreshCw } from "lucide-react";
 
+// Define types
+interface Book {
+  _id: string;
+  title: string;
+  author: string;
+  genre: string;
+  isbn: string;
+  description?: string;
+  copies: number;
+  available: boolean;
+}
+
+// This should match what your BorrowBookCard component expects
+interface BorrowSummary {
+  _id: string;
+  book: Book;
+  borrowerName: string;
+  quantity: number;
+  totalQuantity: number; // ✅ Added this required property
+  dueDate: string;
+  status: 'active' | 'returned' | 'overdue';
+  borrowedAt: string;
+}
+
+interface ApiResponse {
+  success: boolean;
+  data: BorrowSummary[];
+  message?: string;
+}
+
 export function BorrowedBooksList() {
-  const { data, isLoading, error, refetch } = useGetBorrowSummaryQuery();
+  // ✅ Fixed: Pass undefined as argument for queries with no parameters
+  const { data, isLoading, error, refetch } = useGetBorrowSummaryQuery(undefined);
 
   if (isLoading) {
     return (
@@ -45,7 +76,7 @@ export function BorrowedBooksList() {
     );
   }
 
-  const borrowedBooks = data?.data || [];
+  const borrowedBooks: BorrowSummary[] = (data as ApiResponse)?.data || [];
 
   if (borrowedBooks.length === 0) {
     return (
@@ -80,10 +111,10 @@ export function BorrowedBooksList() {
     );
   }
 
-  // Separate books by status for better organization
-  const activeBooks = borrowedBooks.filter(borrow => borrow.status !== 'returned');
-  const returnedBooks = borrowedBooks.filter(borrow => borrow.status === 'returned');
-  const overdueBooks = activeBooks.filter(borrow => {
+  // ✅ Fixed: Added explicit typing for filter parameters
+  const activeBooks = borrowedBooks.filter((borrow: BorrowSummary) => borrow.status !== 'returned');
+  const returnedBooks = borrowedBooks.filter((borrow: BorrowSummary) => borrow.status === 'returned');
+  const overdueBooks = activeBooks.filter((borrow: BorrowSummary) => {
     const dueDate = new Date(borrow.dueDate);
     const today = new Date();
     return today > dueDate || borrow.status === 'overdue';
@@ -161,7 +192,7 @@ export function BorrowedBooksList() {
               )}
             </h3>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {activeBooks.map((borrow) => (
+              {activeBooks.map((borrow: BorrowSummary) => (
                 <BorrowedBookCard key={`${borrow._id}-${borrow.book.isbn}`} borrow={borrow} />
               ))}
             </div>
@@ -175,7 +206,7 @@ export function BorrowedBooksList() {
               Recently Returned
             </h3>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {returnedBooks.slice(0, 8).map((borrow) => (
+              {returnedBooks.slice(0, 8).map((borrow: BorrowSummary) => (
                 <BorrowedBookCard key={`${borrow._id}-${borrow.book.isbn}`} borrow={borrow} />
               ))}
             </div>

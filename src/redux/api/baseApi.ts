@@ -1,8 +1,9 @@
+import type { IBook } from "@/type";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const baseApi = createApi({
   reducerPath: "baseApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:5000/api" }),
+  baseQuery: fetchBaseQuery({ baseUrl: "https://b5a3-library-management.onrender.com/api" }),
   tagTypes: ["Books", "BorrowSummary"],
   endpoints: (builder) => ({
     getBooks: builder.query({
@@ -35,7 +36,7 @@ export const baseApi = createApi({
       onQueryStarted: async (id, { dispatch, queryFulfilled }) => {
         const patchResult = dispatch(
           baseApi.util.updateQueryData("getBooks", undefined, (draft) => {
-            draft.data = draft.data.filter((book) => book._id !== id);
+            draft.data = draft.data.filter((book:IBook) => book._id !== id);
           })
         );
         try {
